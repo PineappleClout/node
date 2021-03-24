@@ -663,6 +663,7 @@ func (di *Dependencies) bootstrapNetworkComponents(options node.Options) (err er
 		network.MysteriumAPIAddress,
 		options.Transactor.TransactorEndpointAddress,
 		hermesURL,
+		options.PilvytisAddress,
 	); err != nil {
 		return err
 	}
@@ -671,6 +672,7 @@ func (di *Dependencies) bootstrapNetworkComponents(options node.Options) (err er
 		network.MysteriumAPIAddress,
 		options.Transactor.TransactorEndpointAddress,
 		hermesURL,
+		options.PilvytisAddress,
 	); err != nil {
 		return err
 	}
