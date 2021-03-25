@@ -657,16 +657,7 @@ func (di *Dependencies) bootstrapNetworkComponents(options node.Options) (err er
 		return err
 	}
 
-	if _, err := firewall.AllowURLAccess(
-		network.EtherClientRPC,
-		network.MysteriumAPIAddress,
-		options.Transactor.TransactorEndpointAddress,
-		hermesURL,
-		options.PilvytisAddress,
-	); err != nil {
-		return err
-	}
-	if _, err := di.ServiceFirewall.AllowURLAccess(
+	if err := di.AllowURLAccess(
 		network.EtherClientRPC,
 		network.MysteriumAPIAddress,
 		options.Transactor.TransactorEndpointAddress,
@@ -716,10 +707,7 @@ func (di *Dependencies) bootstrapIdentityComponents(options node.Options) error 
 }
 
 func (di *Dependencies) bootstrapQualityComponents(options node.OptionsQuality) (err error) {
-	if _, err := firewall.AllowURLAccess(options.Address); err != nil {
-		return err
-	}
-	if _, err := di.ServiceFirewall.AllowURLAccess(options.Address); err != nil {
+	if err := di.AllowURLAccess(options.Address); err != nil {
 		return err
 	}
 
@@ -763,12 +751,10 @@ func (di *Dependencies) bootstrapQualityComponents(options node.OptionsQuality) 
 }
 
 func (di *Dependencies) bootstrapLocationComponents(options node.Options) (err error) {
-	if _, err = firewall.AllowURLAccess(options.Location.IPDetectorURL); err != nil {
+	if err = di.AllowURLAccess(options.Location.IPDetectorURL); err != nil {
 		return errors.Wrap(err, "failed to add firewall exception")
 	}
-	if _, err = di.ServiceFirewall.AllowURLAccess(options.Location.IPDetectorURL); err != nil {
-		return errors.Wrap(err, "failed to add firewall exception")
-	}
+
 	ipResolver := ip.NewResolver(di.HTTPClient, options.BindAddress, options.Location.IPDetectorURL, ip.IPFallbackAddresses)
 	di.IPResolver = ip.NewCachedResolver(ipResolver, 5*time.Minute)
 
@@ -781,10 +767,7 @@ func (di *Dependencies) bootstrapLocationComponents(options node.Options) (err e
 	case node.LocationTypeMMDB:
 		resolver, err = location.NewExternalDBResolver(filepath.Join(options.Directories.Script, options.Location.Address), di.IPResolver)
 	case node.LocationTypeOracle:
-		if _, err := firewall.AllowURLAccess(options.Location.Address); err != nil {
-			return err
-		}
-		if _, err := di.ServiceFirewall.AllowURLAccess(options.Location.Address); err != nil {
+		if err := di.AllowURLAccess(options.Location.Address); err != nil {
 			return err
 		}
 		resolver, err = location.NewOracleResolver(di.HTTPClient, options.Location.Address), nil
@@ -964,4 +947,16 @@ func (di *Dependencies) bootstrapResidentCountry() error {
 
 func errMissingDependency(dep string) error {
 	return errors.New("Missing dependency: " + dep)
+}
+
+func (di *Dependencies) AllowURLAccess(servers ...string) error {
+	if _, err := firewall.AllowURLAccess(servers...); err != nil {
+		return err
+	}
+
+	if _, err := di.ServiceFirewall.AllowURLAccess(servers...); err != nil {
+		return err
+	}
+
+	return nil
 }
