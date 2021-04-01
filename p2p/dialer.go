@@ -25,8 +25,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mysteriumnetwork/node/trace"
 	nats_lib "github.com/nats-io/nats.go"
+	"github.com/rs/zerolog/log"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/mysteriumnetwork/node/communication/nats"
 	"github.com/mysteriumnetwork/node/core/ip"
@@ -34,9 +35,8 @@ import (
 	"github.com/mysteriumnetwork/node/firewall"
 	"github.com/mysteriumnetwork/node/identity"
 	"github.com/mysteriumnetwork/node/pb"
-
-	"github.com/rs/zerolog/log"
-	"google.golang.org/protobuf/proto"
+	"github.com/mysteriumnetwork/node/router"
+	"github.com/mysteriumnetwork/node/trace"
 )
 
 const maxBrokerConnectAttempts = 25
@@ -279,6 +279,15 @@ func (m *dialer) dialDirect(ctx context.Context, providerID identity.Identity, c
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not create UDP conn for service: %w", err)
 	}
+
+	if err := router.ProtectUDPConn(conn1); err != nil {
+		return nil, nil, fmt.Errorf("failed to protect udp connection: %w", err)
+	}
+
+	if err := router.ProtectUDPConn(conn2); err != nil {
+		return nil, nil, fmt.Errorf("failed to protect udp connection: %w", err)
+	}
+
 	return conn1, conn2, err
 }
 
