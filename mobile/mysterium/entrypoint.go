@@ -25,13 +25,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mysteriumnetwork/node/consumer/entertainment"
-
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/mysteriumnetwork/node/cmd"
 	"github.com/mysteriumnetwork/node/config"
+	"github.com/mysteriumnetwork/node/consumer/entertainment"
 	"github.com/mysteriumnetwork/node/core/connection"
 	"github.com/mysteriumnetwork/node/core/connection/connectionstate"
 	"github.com/mysteriumnetwork/node/core/ip"
@@ -89,6 +88,7 @@ type MobileNodeOptions struct {
 	Testnet2                       bool
 	Localnet                       bool
 	ExperimentNATPunching          bool
+	KeepConnectedOnFail            bool
 	MysteriumAPIAddress            string
 	BrokerAddresses                []string
 	EtherClientRPC                 string
@@ -119,6 +119,7 @@ func DefaultNodeOptions() *MobileNodeOptions {
 	return &MobileNodeOptions{
 		Testnet2:                       true,
 		ExperimentNATPunching:          true,
+		KeepConnectedOnFail:            true,
 		MysteriumAPIAddress:            metadata.Testnet2Definition.MysteriumAPIAddress,
 		BrokerAddresses:                metadata.Testnet2Definition.BrokerAddresses,
 		EtherClientRPC:                 metadata.Testnet2Definition.EtherClientRPC,
@@ -151,7 +152,7 @@ func NewNode(appPath string, options *MobileNodeOptions) (*MobileNode, error) {
 	}
 
 	config.Current.SetDefault(config.FlagChainID.Name, options.ChainID)
-	config.Current.SetDefault(config.FlagKeepConnectedOnFail.Name, true)
+	config.Current.SetDefault(config.FlagKeepConnectedOnFail.Name, options.KeepConnectedOnFail)
 	config.Current.SetDefault(config.FlagDefaultCurrency.Name, metadata.DefaultNetwork.DefaultCurrency)
 	config.Current.SetDefault(config.FlagPaymentsConsumerPricePerGBUpperBound.Name, metadata.DefaultNetwork.Payments.Consumer.PricePerGIBMax)
 	config.Current.SetDefault(config.FlagPaymentsConsumerPricePerGBLowerBound.Name, metadata.DefaultNetwork.Payments.Consumer.PricePerGIBMin)
