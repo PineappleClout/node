@@ -59,9 +59,11 @@ var (
 	hundredthThou               = float64(1) / float64(100000)
 )
 
-var ethClient *ethclient.Client
-var ethSigner func(signer types.Signer, address common.Address, tx *types.Transaction) (*types.Transaction, error)
-var transactorMongo *Mongo
+var (
+	ethClient       *ethclient.Client
+	ethSigner       func(signer types.Signer, address common.Address, tx *types.Transaction) (*types.Transaction, error)
+	transactorMongo *Mongo
+)
 
 var (
 	providerStake, _            = big.NewInt(0).SetString("50000000000000000000", 10)
@@ -174,7 +176,7 @@ func TestConsumerConnectsToProvider(t *testing.T) {
 		wg.Wait()
 	})
 	t.Run("Validate provider earnings", func(t *testing.T) {
-		var sum = new(big.Int)
+		sum := new(big.Int)
 		for _, v := range consumersToTest {
 			sum = new(big.Int).Add(sum, v.balanceSpent)
 		}
