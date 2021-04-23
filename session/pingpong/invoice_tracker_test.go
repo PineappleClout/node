@@ -63,6 +63,10 @@ func (mac *mockHermesCaller) RequestPromise(rp RequestPromise) (crypto.Promise, 
 	return crypto.Promise{}, mac.errToReturn
 }
 
+func (mac *mockHermesCaller) PayAndSettle(rp RequestPromise) (crypto.Promise, error) {
+	return crypto.Promise{}, mac.errToReturn
+}
+
 func (mac *mockHermesCaller) RevealR(r string, provider string, agreementID *big.Int) error {
 	return mac.errToReturn
 }
